@@ -9,7 +9,8 @@ RUN apt-get update && apt-get install -y \
     llvm-dev \
     libclang-dev \
     clang \
-    librocksdb-dev
+    librocksdb-dev \
+    ca-certificates
 
 # Copy the manifests
 COPY Cargo.toml Cargo.lock ./
@@ -41,6 +42,11 @@ COPY --from=builder /usr/src/su/target/release/su /app/su
 COPY --from=builder /lib/x86_64-linux-gnu/ /lib/x86_64-linux-gnu/
 COPY --from=builder /lib64/ /lib64/
 
+# Copy the SSL certificates
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+
 # Provide instructions for building the binary
 # (This will be displayed when someone runs `docker build`)
 LABEL build_instructions="To build just the binary, run the following command: docker build --target builder -t su ."
@@ -49,4 +55,4 @@ LABEL build_instructions="To build just the binary, run the following command: d
 ENTRYPOINT [ "/app/su" ]
 
 # Run time command arguments, default is empty
-CMD []
+CMD [ "su", "9000" ]
