@@ -1,0 +1,56 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: su
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  su:
+    platform: linux/amd64
+    build: ./servers/su
+    env_file: ./servers/su/.env
+    depends_on:
+      - db
+    volumes:
+      - ./wallets:/app/wallets
+    ports:
+      - "9000:9000"
+    networks:
+      - app-network
+
+  cu:
+    build: ./servers/cu
+    env_file: ./servers/cu/.env
+    volumes:
+      - ./wallets:/app/wallets
+      - cu_tmp:/tmp
+      - cu_sqlite:/usr/app/sqlite
+    ports:
+      - "6363:6363"
+    networks:
+      - app-network
+
+  mu:
+    build: ./servers/mu
+    env_file: ./servers/mu/.env
+    depends_on:
+      - cu
+    volumes:
+      - ./wallets:/app/wallets
+    ports:
+      - "3005:3005"
+    networks:
+      - app-network
+
+volumes:
+  db_data:
+  cu_tmp:
+  cu_sqlite:
+
+networks:
+  app-network:
