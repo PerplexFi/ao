@@ -48,6 +48,21 @@ export const server = pipeP(
       cacheCheckpointInterval.unref()
     }
 
+    if (config.HOT_PROCESSES.length > 0 && config.HOT_PROCESSES_EVAL_INTERVAL) {
+      logger('Setting up Interval to Evaluate Hot Processes every %s', ms(config.HOT_PROCESSES_EVAL_INTERVAL))
+      const hotProcessesCheckpointInterval = setInterval(async () => {
+        logger('Hot Processes Eval Interval Reached. Attempting to evaluate all Hot Processes to latest...')
+        for (const processId of config.HOT_PROCESSES) {
+          // NOTE: Not sure if we want needsOnlyMemory to be true or false here.
+          //       From my understanding, true means not checking the database for
+          //       existing evaluations...
+          await domain.apis.readState({ processId, needsOnlyMemory: false }).toPromise()
+        }
+        logger('Hot Processes Eval Done. Done evaluating all Hot Processes to latest.')
+      }, config.HOT_PROCESSES_EVAL_INTERVAL)
+      hotProcessesCheckpointInterval.unref()
+    }
+
     process.on('SIGTERM', async () => {
       logger('Received SIGTERM. Gracefully shutting down server...')
       app.close(

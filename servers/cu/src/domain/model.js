@@ -196,6 +196,15 @@ export const domainConfigSchema = z.object({
    */
   ALLOW_PROCESSES: commaDelimitedArraySchema,
   /**
+   * A list of process ids that the CU should keep up to date on message
+   * evaluations.
+   */
+  HOT_PROCESSES: commaDelimitedArraySchema,
+  /**
+   * The interval at which the CU should evaluate hot processes
+   */
+  HOT_PROCESSES_EVAL_INTERVAL: positiveIntSchema,
+  /**
    * A list of wallets whose processes the CU should exclusively allow
    * aka. whitelist of processes created by these wallets
    */

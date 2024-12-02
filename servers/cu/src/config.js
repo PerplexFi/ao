@@ -146,6 +146,8 @@ const CONFIG_ENVS = {
     BUSY_THRESHOLD: process.env.BUSY_THRESHOLD || 0, // disabled
     RESTRICT_PROCESSES: process.env.RESTRICT_PROCESSES || [],
     ALLOW_PROCESSES: process.env.ALLOW_PROCESSES || [],
+    HOT_PROCESSES: process.env.HOT_PROCESSES || [],
+    HOT_PROCESSES_EVAL_INTERVAL: process.env.HOT_PROCESSES_EVAL_INTERVAL || ms('1m'),
     ALLOW_OWNERS: process.env.ALLOW_OWNERS || []
   },
   production: {
@@ -196,6 +198,8 @@ const CONFIG_ENVS = {
     BUSY_THRESHOLD: process.env.BUSY_THRESHOLD || 0, // disabled
     RESTRICT_PROCESSES: process.env.RESTRICT_PROCESSES || [],
     ALLOW_PROCESSES: process.env.ALLOW_PROCESSES || [],
+    HOT_PROCESSES: process.env.HOT_PROCESSES || [],
+    HOT_PROCESSES_EVAL_INTERVAL: process.env.HOT_PROCESSES_EVAL_INTERVAL || ms('1m'),
     ALLOW_OWNERS: process.env.ALLOW_OWNERS || []
   }
 }
