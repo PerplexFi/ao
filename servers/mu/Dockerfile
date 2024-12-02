@@ -6,11 +6,11 @@ WORKDIR /usr/app
 
 COPY ./package.json .
 COPY ./package-lock.json .
+RUN npm install --ignore-engines
+
 COPY ./src ./src
 
 RUN mkdir /usr/app/mu-data/
-
-RUN npm install --ignore-engines
 
 EXPOSE 3005
 

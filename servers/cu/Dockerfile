@@ -4,11 +4,11 @@ WORKDIR /usr/app
 
 COPY ./package.json .
 COPY ./package-lock.json .
+RUN npm install --omit=dev
+
 COPY ./src ./src
 
-RUN npm install --omit=dev && \
-    mkdir /db/ && \
-    mkdir /file-checkpoints/
+RUN mkdir /db/ && mkdir /file-checkpoints/
 
 ENV NODE_ENV=production
 
