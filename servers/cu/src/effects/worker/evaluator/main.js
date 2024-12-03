@@ -19,6 +19,7 @@ export const createApis = async (ctx) => {
     }),
     bootstrapWasmInstance: WasmClient.bootstrapWasmInstanceWith(),
     saveEvaluation: AoEvaluationClient.saveEvaluationWith({ db: sqlite, logger: ctx.logger }),
+    broadcastEvaluation: () => { /* TODO: Not sure what to make of this yet... */},
     ARWEAVE_URL: ctx.ARWEAVE_URL,
     logger: ctx.logger
   })

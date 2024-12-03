@@ -23,6 +23,7 @@ import * as AoModuleClient from './effects/ao-module.js'
 import * as AoEvaluationClient from './effects/ao-evaluation.js'
 import * as AoBlockClient from './effects/ao-block.js'
 import * as MetricsClient from './effects/metrics.js'
+import * as SSEClient from './effects/sse.js'
 
 import { readResultWith } from './domain/api/readResult.js'
 import { readStateWith, pendingReadStates } from './domain/api/readState.js'
@@ -31,6 +32,7 @@ import { healthcheckWith } from './domain/api/healthcheck.js'
 import { readResultsWith } from './domain/api/readResults.js'
 import { dryRunWith } from './domain/api/dryRun.js'
 import { statsWith } from './domain/api/perf.js'
+import { subscribeWith } from './domain/api/subscribe.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -334,6 +336,7 @@ export const createApis = async (ctx) => {
     saveProcess: AoProcessClient.saveProcessWith({ db: sqlite, logger }),
     findEvaluation: AoEvaluationClient.findEvaluationWith({ db: sqlite, logger }),
     saveEvaluation: AoEvaluationClient.saveEvaluationWith({ db: sqlite, logger }),
+    broadcastEvaluation: SSEClient.withBroadcastEvaluation(),
     findBlocks: AoBlockClient.findBlocksWith({ db: sqlite, logger }),
     saveBlocks: AoBlockClient.saveBlocksWith({ db: sqlite, logger }),
     loadBlocksMeta: AoBlockClient.loadBlocksMetaWith({ fetch: ctx.fetch, GRAPHQL_URL: ctx.GRAPHQL_URL, pageSize: 90, logger }),
@@ -435,6 +438,12 @@ export const createApis = async (ctx) => {
     })
   })
 
+  const subscribeLogger = ctx.logger.child('subscribe')
+  const subscribe = subscribeWith({
+    ...sharedDeps(subscribeLogger),
+    addEvaluationSubscriber: SSEClient.withAddEvaluationSubscriber(),
+  })
+
   /**
    * default readResult that works OOTB
    * - Uses PouchDB to cache evaluations and processes
@@ -512,5 +521,5 @@ export const createApis = async (ctx) => {
 
   const healthcheck = healthcheckWith({ walletAddress: address })
 
-  return { metrics, stats, pendingReadStates, readState, dryRun, readResult, readResults, readCronResults, checkpointWasmMemoryCache, healthcheck }
+  return { metrics, stats, pendingReadStates, readState, dryRun, readResult, readResults, readCronResults, subscribe, checkpointWasmMemoryCache, healthcheck }
 }

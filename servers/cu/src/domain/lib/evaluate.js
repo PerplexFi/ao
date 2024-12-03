@@ -5,7 +5,7 @@ import { Rejected, Resolved, fromPromise, of } from 'hyper-async'
 import { z } from 'zod'
 import { LRUCache } from 'lru-cache'
 
-import { evaluatorSchema, findMessageBeforeSchema, saveLatestProcessMemorySchema } from '../dal.js'
+import { broadcastEvaluationSchema, evaluatorSchema, findMessageBeforeSchema, saveLatestProcessMemorySchema } from '../dal.js'
 import { evaluationSchema } from '../model.js'
 import { removeTagsByNameMaybeValue } from '../utils.js'
 
@@ -84,6 +84,7 @@ export function evaluateWith (env) {
   const loadEvaluator = evaluatorWith(env)
 
   const saveLatestProcessMemory = saveLatestProcessMemorySchema.implement(env.saveLatestProcessMemory)
+  const broadcastEvaluation = broadcastEvaluationSchema.implement(env.broadcastEvaluation)
 
   return (ctx) =>
     of(ctx)
@@ -260,6 +261,14 @@ export function evaluateWith (env) {
                            * TODO: Gas can grow to a huge number. We need to make sure this doesn't crash when that happens
                            */
                           // gasCounter.inc(output.GasUsed ?? 0, { cron: Boolean(cron), dryRun: Boolean(ctx.dryRun) }, { processId: ctx.id, error: Boolean(output.Error) })
+
+                          if (!ctx.dryRun && output.Messages.length > 0) {
+                            logger.debug('Broadcasting evaluation messages for process "%s"', ctx.id)
+                            broadcastEvaluation({
+                              processId: ctx.id,
+                              messages: output.Messages,
+                            });
+                          }
 
                           return output
                         })

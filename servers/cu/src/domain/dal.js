@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { blockSchema, evaluationSchema, processSchema, moduleSchema, rawTagSchema, streamSchema, processCheckpointSchema, bufferSchema } from './model.js'
+import { blockSchema, evaluationSchema, processSchema, moduleSchema, rawTagSchema, streamSchema, processCheckpointSchema, bufferSchema, messageSchema } from './model.js'
 
 // Arweave
 
@@ -127,6 +127,23 @@ export const findEvaluationsSchema = z.function()
     onlyCron: z.boolean().default(false)
   }))
   .returns(z.promise(z.array(evaluationSchema)))
+
+// Subscribe
+
+export const addEvaluationSubscriberSchema = z.function()
+  .args(z.object({
+    processId: z.string(),
+    sseSession: z.any() // better-sse Session
+  }))
+  .returns(z.promise(z.void()))
+
+export const broadcastEvaluationSchema = z.function()
+  .args(z.object({
+    processId: z.string(),
+    // TODO: Improve the shape of the message
+    messages: z.array(z.any()).nullish(),
+  }))
+  .returns(z.promise(z.void()))
 
 // Messages
 
