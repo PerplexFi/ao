@@ -43,9 +43,11 @@ export function withAddEvaluationSubscriber () {
  *
  * @returns {BroadcastEvaluation}
  */
-export function withBroadcastEvaluation () {
+export function withBroadcastEvaluation ({ logger }) {
   return async ({processId, messages}) => {
+    logger.debug('broadcasting %d messages for process id: %s', messages.length, processId);
     const processSubscribers = subscriberChannels.get(processId);
+    logger.debug('found %d subscribers for process id: %s', processSubscribers ? processSubscribers.size : 0, processId);
     if (processSubscribers && messages.length > 0) {
       // Sends messages to all sessions in the channel
       processSubscribers.broadcast({ processId, messages });

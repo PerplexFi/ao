@@ -209,6 +209,10 @@ export function evaluateWith (env) {
                   prev = await Promise.resolve(prev)
                     .then((prev) =>
                       Promise.resolve(prev.Memory)
+                        .then((Memory) => {
+                          logger.debug('Evaluating message ID: %s', message.Id)
+                          return Memory
+                        })
                         /**
                          * Where the actual evaluation is performed
                          */
@@ -220,6 +224,8 @@ export function evaluateWith (env) {
                          */
                         .then(mergeLeft({ noSave, message, cron, ordinate }))
                         .then(async (output) => {
+                          logger.debug('Evaluated message ID: %s', output.message.Id);
+                          logger.debug('Evaluated output Messages count: %d', output.Messages.length);
                           /**
                            * Make sure to set first to false
                            * for all subsequent evaluations for this evaluation stream
@@ -263,10 +269,13 @@ export function evaluateWith (env) {
                           // gasCounter.inc(output.GasUsed ?? 0, { cron: Boolean(cron), dryRun: Boolean(ctx.dryRun) }, { processId: ctx.id, error: Boolean(output.Error) })
 
                           if (!ctx.dryRun && output.Messages.length > 0) {
-                            logger.debug('Broadcasting evaluation messages for process "%s"', ctx.id)
+                            logger.debug('Broadcasting evaluation of message "%s" for process "%s" ', output.message.Id, ctx.id)
                             broadcastEvaluation({
                               processId: ctx.id,
-                              messages: output.Messages,
+                              messages: output.Messages.map((message) => ({
+                                ...message,
+                                Tags: [...message.Tags, { name: 'Pushed-For', value: output.message.Id }]
+                              })),
                             });
                           }
 

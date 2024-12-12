@@ -26,6 +26,7 @@ export function evaluateWith ({
   function loadInstance ({ streamId, moduleId, wasmModule, moduleOptions }) {
     return of(wasmModule)
       .chain((wasmModule) => {
+        logger('Loading instance for streamId "%s"', streamId)
         /**
          * If the wasmModule is provided, then no need
          * to load it.
@@ -73,7 +74,10 @@ export function evaluateWith ({
     const { streamId } = args
 
     return of(streamId)
-      .map((streamId) => wasmInstanceCache.get(streamId))
+      .map((streamId) => {
+        logger('Checking for cached instance for streamId "%s"', streamId)
+        return wasmInstanceCache.get(streamId)
+      })
       .chain((wasmInstance) => wasmInstance
         ? Resolved(wasmInstance)
         : Rejected(args)

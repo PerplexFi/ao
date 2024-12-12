@@ -336,7 +336,7 @@ export const createApis = async (ctx) => {
     saveProcess: AoProcessClient.saveProcessWith({ db: sqlite, logger }),
     findEvaluation: AoEvaluationClient.findEvaluationWith({ db: sqlite, logger }),
     saveEvaluation: AoEvaluationClient.saveEvaluationWith({ db: sqlite, logger }),
-    broadcastEvaluation: SSEClient.withBroadcastEvaluation(),
+    broadcastEvaluation: SSEClient.withBroadcastEvaluation({ logger }),
     findBlocks: AoBlockClient.findBlocksWith({ db: sqlite, logger }),
     saveBlocks: AoBlockClient.saveBlocksWith({ db: sqlite, logger }),
     loadBlocksMeta: AoBlockClient.loadBlocksMetaWith({ fetch: ctx.fetch, GRAPHQL_URL: ctx.GRAPHQL_URL, pageSize: 90, logger }),
