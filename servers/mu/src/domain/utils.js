@@ -271,8 +271,9 @@ export const checkStage = (stage) => {
  *
  */
 
-export const setStage = (prevStage, nextStage) => {
+export const setStage = (prevStage, nextStage, logger) => {
   return (ctx) => {
+    logger?.({ log: `[${ctx.stage}] should be ${prevStage} ====> ${nextStage}` })
     if (Array.isArray(prevStage) && prevStage.includes(ctx.stage)) return { ...ctx, stage: nextStage }
     if (ctx.stage === prevStage) {
       return { ...ctx, stage: nextStage }

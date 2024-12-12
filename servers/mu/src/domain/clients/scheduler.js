@@ -37,8 +37,9 @@ function writeDataItemWith ({ fetch, histogram, logger }) {
     return of(Buffer.from(data, 'base64'))
       .map(logger.tap({ log: `Forwarding message to SU ${suUrl}`, logId }))
       .chain(
-        fromPromise((body) =>
-          suFetch(suUrl, {
+        fromPromise(async (body) => {
+          logger({ log: `Fetching SU ${suUrl}`, logId })
+          return suFetch(suUrl, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/octet-stream',
@@ -47,6 +48,7 @@ function writeDataItemWith ({ fetch, histogram, logger }) {
             redirect: 'manual',
             body
           }).then(async (response) => {
+            logger({ log: `SU first response status ${response.status}`, logId})
             /*
             After upgrading to node 22 we have to handle
             the redirects manually otherwise fetch throws
@@ -61,11 +63,14 @@ function writeDataItemWith ({ fetch, histogram, logger }) {
                   Accept: 'application/json'
                 },
                 body
+              }).then((res) => {
+                logger({ log: `SU redirect response status ${res.status}`, logId})
+                return res
               })
             }
             return response
           })
-        )
+        })
       )
       .bimap((e) => {
         logger({ log: `Error while communicating with SU: ${e}`, logId })

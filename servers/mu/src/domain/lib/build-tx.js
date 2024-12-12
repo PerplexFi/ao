@@ -21,10 +21,12 @@ export function buildTxWith (env) {
   isWallet = fromPromise(isWalletSchema.implement(isWallet))
 
   return (ctx) => {
+    logger({ log: 'Building tx', logId: ctx.logId })
     if (!checkStage('build-tx')(ctx)) return Resolved(ctx)
     return isWallet(ctx.cachedMsg.processId, ctx.logId)
       .chain(
         (isWalletId) => {
+          logger({ log: `Checking if ${ctx.cachedMsg.fromProcessId} is a wallet` })
           return locateProcess(ctx.cachedMsg.fromProcessId)
             .chain(
               (fromSchedLocation) => fetchSchedulerProcess(
@@ -36,6 +38,7 @@ export function buildTxWith (env) {
                   fromProcessSchedData: schedulerResult
                 }))
                 .chain(({ fromProcessSchedData }) => {
+                  logger({ log: `Located process ${ctx.cachedMsg.processId}` })
                   /*
                     If the target is a wallet id we will move
                     on here without setting a schedLocation

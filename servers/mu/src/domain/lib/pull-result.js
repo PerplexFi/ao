@@ -10,7 +10,7 @@ const ctxSchema = z.object({
   initialTxId: z.any()
 }).passthrough()
 
-function fetchResultWith ({ fetchResult }) {
+function fetchResultWith ({ fetchResult, logger }) {
   const fetchResultAsync = fromPromise(resultSchema.implement(fetchResult))
 
   return (ctx) => {
@@ -19,6 +19,7 @@ function fetchResultWith ({ fetchResult }) {
         return fetchResultAsync(ctx.tx.id, ctx.tx.processId, ctx.logId)
       })
       .chain(fetchedResult => {
+        logger({ log: 'Fetched CU result' });
         const msgs = fetchedResult.Messages.map(msg => {
           return {
             msg,

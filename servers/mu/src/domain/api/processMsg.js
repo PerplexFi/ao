@@ -28,9 +28,13 @@ export function processMsgWith ({
 
   return (ctx) => {
     return of(ctx)
-      .map(setStage('start', 'build-tx'))
+      .map((ctx) => {
+        logger({ log: '=== Processing message ===', logId: ctx.logId })
+        return ctx
+      })
+      .map(setStage('start', 'build-tx', logger))
       .chain(buildTx)
-      .map(setStage('build-tx', 'write-message'))
+      .map(setStage('build-tx', 'write-message', logger))
       /*
         If the tx has a target that is not a process, it has
         been written directly to Arweave. So we dont go through
@@ -42,13 +46,13 @@ export function processMsgWith ({
           .chain((ctx) => {
             return ctx.arweaveTx
               ? of(ctx)
-                .map(setStage('write-message-arweave', 'end'))
+                .map(setStage('write-message-arweave', 'end', logger))
               : of(ctx)
-                .map(setStage('write-message-su', 'get-cu-address'))
+                .map(setStage('write-message-su', 'get-cu-address', logger))
                 .chain(getCuAddress)
-                .map(setStage('get-cu-address', 'pull-result'))
+                .map(setStage('get-cu-address', 'pull-result', logger))
                 .chain(pullResult)
-                .map(setStage('pull-result', 'end'))
+                .map(setStage('pull-result', 'end', logger))
           })
       })
       .bimap(

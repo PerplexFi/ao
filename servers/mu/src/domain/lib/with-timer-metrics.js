@@ -1,6 +1,8 @@
 import { always } from 'ramda'
 import { swallow } from '../utils.js'
 
+let timer_id = 0;
+
 /**
  * withTimerMetrics timer only needs to implement a function called 'startTimer' that returns a function to be invoked to stop the timer.
  * some implementations such as prometheus's histogram have additional constraints such as the labels returned from 'startLabelsFrom' and 'stopLabelsFrom'
@@ -24,14 +26,22 @@ export function withTimerMetrics ({ timer, startLabelsFrom = always({}), stopLab
       }
     })
 
+    const timerId = timer_id;
+    timer_id += 1;
+
     return Promise.resolve()
+      .then(() => {
+        logger({ log: [`METRICS #${timerId}: Starting timer`, startLabels] })
+      })
       .then(() => func(...funcArgs))
       .then((funcReturn) => {
+        logger({ log: [`METRICS #${timerId}: Stopping timer`, startLabels, stopLabelsFrom(funcReturn)] })
         safeStop(stopLabelsFrom(funcReturn), traces)
 
         return funcReturn
       })
       .catch((funcReturn) => {
+        logger({ log: [`METRICS #${timerId}: Stopping timer`, startLabels, stopLabelsFrom(funcReturn)] })
         safeStop(stopLabelsFrom(funcReturn), traces)
 
         throw funcReturn
